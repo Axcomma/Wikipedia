@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Titillium+Web:wght@600&display=swap');
+
+        :root {
+            --bgColor: #242629;
+            --card: #16161a;
+            --button: #7f5af0;
+            --paragraph: #94a1b2;
+            --btnText: #fffffe;
+            --autre: #2cb67d;
+        }
+
+        body {
+            background-color: var(--bgColor);
+        }
+
+        p {
+            color: var(--paragraph);
+        }
+
+        img {
+            width: 200px;
+        }
+
+        .search_div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+            margin: auto;
+            margin-top: 20vh;
+            text-align: center;
+        }
+
+        .search_div button {
+            text-align: center;
+            border: none;
+            padding: 2%;
+            width: 80%;
+            margin-top: 1vh;
+            cursor: pointer;
+            outline: none;
+            background-color: var(--button);
+            color: var(--btnText);
+            border-radius: 1px;
+        }
+
+        .js-search-input {
+            width: 100%;
+            padding: 3%;
+            border-radius: 10px;
+            margin: auto;
+            outline: none;
+            background-color: var(--paragraph);
+            color: var(--btnText);
+            border: none;
+        }
+
+        .resultat-item {
+            color: var(--paragraph);
+            width: 50%;
+            margin: auto;
+            margin-top: 5vh;
+            margin-bottom: 5vh;
+            overflow: auto;
+            background-color: var(--card);
+            text-align: center;
+            padding: 3%;
+        }
+
+        .result-title {
+            padding: 3%;
+        }
+
+        .result-title a {
+            color: var(--paragraph);
+            padding: 5%;
+        }
+
+        .result-link {
+            color: var(--button);
+        }
+
+        .search-results .js-search-results {
+            width: 50%;
+            margin: auto;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="search_div">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Wikipedia-logo-v2-square.svg/1200px-Wikipedia-logo-v2-square.svg.png"
+                alt="">
+            <p>Rechercher sur wikipedia</p>
+            <form class="search_bar js-search-form">
+                <input type="text" class="js-search-input">
+                <button type="submit">Rechercher</button>
+
+            </form>
+        </div>
+    </section>
+    <section class="search-results js-search-results">
+    </section>
+
+    <script defer>
+        function handleSubmit(event) {
+            event.preventDefault()
+            const SearchQuery = document.querySelector(".js-search-input").value.trim();
+            const searchResults = document.querySelector(".js-search-results");
+            searchResults.innerHTML = "";
+
+            const endpoint = `https://fr.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8&format=json&origin=*&srlimit=20&srsearch=${SearchQuery}`
+
+            fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) throw Error(response.statusText)
+                    return response.json()
+                })
+                .then(({ query: { search: results } }) => {
+                    if (results.length === 0) {
+                        alert("Rien pas de resultat");
+                        return;
+                    }
+                    results.forEach(result => {
+                        const url = `https://fr.wikipedia.org/?curid=${result.pageid}`
+                        searchResults.insertAdjacentHTML(
+                            'beforeend',
+                            `
+                            <div class="resultat-item">
+            <h3 class="result-title">
+                <a href="${url}" target="_blank" rel="noopener">${result.title}</a>
+            </h3>
+            <a href="${url}" class="result-link" target="_blank" rel="noopener">${url}</a>
+            <br> <br>
+            <span class="result-snippet">
+              ${result.snippet}
+            </span> <br>
+        </div>`
+                        )
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Echec de la recherche sur wikipedia")
+                })
+        }
+        document.querySelector('.js-search-form').addEventListener("submit", handleSubmit)
+    </script>
+
+</body>
+
+
+</html>
